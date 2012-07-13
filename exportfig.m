@@ -1,5 +1,12 @@
+%% EXPORTFIG
+% A function for generating images from MATLAB figures. The function will
+% save a copy of the figure (*.fig) and an image that is sized exactly as
+% the figure itself.
+
+%% Function Definition
 function exportfig(handle,varargin)
-% EXPORTFIG exports a figure as a *.fig and an additional image file
+% EXPORTFIG 
+% exports a figure as a *.fig and an additional image file
 %__________________________________________________________________________
 % SYNTAX:
 %  exportfig(handle)
@@ -31,10 +38,11 @@ function exportfig(handle,varargin)
 %   exportfig(gcf)
 %__________________________________________________________________________
 
-% 1 - DEFINE THE IMAGE FILE FORMATS DESIRED
+%% 1 - DEFINE THE IMAGE FILE FORMATS DESIRED
 % (if additional formats are desired add the extenstion and associated
 % description to the filterspec variable and add the associated print
 % command option, see "help print" for a list)
+
     filterspec = {'*.pdf','PDF vector (*.pdf)';...
         '*.jpg','JPEG bitmap (*.jpg)';...
         '*.png','Portable Network Graphics (*.png)';...
@@ -44,7 +52,8 @@ function exportfig(handle,varargin)
     cmd = {'-dpdf','-djpeg','-dpng','-dmeta','-depsc','-tiff'};  
     for j = 1:length(filterspec); ext{j} = filterspec{j,1}(2:end); end
     
-% 2 - ERROR CHECKING
+%% 2 - ERROR CHECKING
+
     % Check that cmd and filterspec variables are the same size
         if length(filterspec) ~= length(cmd);
             error('exportfig:printfile',['The file filter ',...
@@ -56,19 +65,21 @@ function exportfig(handle,varargin)
             error('exportfig:badhandle','Input figure handle was invalid');
         end  
    
- % 3 - GATHER USER INPUT
+%% 3 - GATHER USER INPUT
+
     [mfile,pfile,res,clr] = getuseroptions(ext,varargin{:});
     if strcmpi(clr,'clear');
         set(handle,'UserData','','Filename','');
     end
     
-% 4 - LOAD THE LAST PATH USED BY EXPORTFIG
+%% 4 - LOAD THE LAST PATH USED BY EXPORTFIG
     if ~ispref('exportfig','lastdir'); 
         addpref('exportfig','lastdir',''); 
     end
     pn = getpref('exportfig','lastdir');
 
-% 5 - DETERMINE THE FILENAME FOR THE *.FIG
+%% 5 - DETERMINE THE FILENAME FOR THE *.FIG
+
     % Determine the matlab .fig file to save
         if isempty(mfile); mfile = get(handle,'Filename'); end
         if isempty(mfile); 
@@ -88,7 +99,8 @@ function exportfig(handle,varargin)
         setpref('exportfig','lastdir',pn);    
         saveas(handle,mfile); set(handle,'Filename',mfile); % Stores .fig file
 
-% 7 - DETERMINE THE IMAGE FILENAME TO CREATE
+%% 6 - DETERMINE THE IMAGE FILENAME TO CREATE
+
     if isempty(pfile); pfile = get(handle,'UserData'); end
     if ~ischar(pfile) || isempty(pfile);
         [pn,fn] = fileparts(mfile);
@@ -99,13 +111,14 @@ function exportfig(handle,varargin)
     end
     set(handle,'UserData',pfile); % Stores image name in figures userdata
 
-% 8 - SET THE PAPERSIZE FOR PRINTING
+%% 7 - SET THE PAPERSIZE FOR PRINTING
     set(handle,'Units','inches');
     set(handle,'PaperUnits','Inches','PaperPositionMode','auto');
     P = get(handle,'Position');
     set(handle,'PaperSize', [P(3),P(4)]);
 
-% 9 - PRINT THE FILE
+%% 8 - PRINT THE FILE
+
     % Create a directory if it does not exist
         [p,~,e] = fileparts(pfile);
         if ~isempty(p) && ~exist(p,'dir'); 
@@ -121,16 +134,17 @@ function exportfig(handle,varargin)
     % Print the file    
         try
             idx = find(strcmp(e,ext),1,'first');
-            fhandle = ['-f',num2str(handle)];
+            fhandle = ['-f', num2str(handle)];
             print(cmd{idx},res,'-noui','-painters',fhandle,pfile);
         catch err
             disp('Failed to write file, make sure the file is not open.');
             rethrow(err);
         end
     
-%--------------------------------------------------------------------------
+%% SUBFUNTION: getuseroptions
 function [mfile,pfile,res,clr] = getuseroptions(ext,varargin)
-% GETUSEROPTIONS gathers the user inputs
+% GETUSEROPTIONS 
+% gathers the user inputs
 
 % Set the default values
     mfile = ''; pfile = ''; res = '-r600'; clr = '';
